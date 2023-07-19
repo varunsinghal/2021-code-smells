@@ -2,6 +2,8 @@ from dataclasses import dataclass, field
 from enum import Enum, auto
 from typing import List
 
+from pos.customer import Customer
+
 ORDER_ID_LENGTH = 6
 
 
@@ -13,16 +15,6 @@ class OrderStatus(Enum):
     CANCELLED = auto()
     DELIVERED = auto()
     RETURNED = auto()
-
-
-@dataclass
-class Customer:
-    id: int = 0
-    name: str = ""
-    address: str = ""
-    postal_code: str = ""
-    city: str = ""
-    email: str = ""
 
 
 @dataclass

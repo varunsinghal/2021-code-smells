@@ -26,6 +26,8 @@ class POSSystem:
         return self.orders[order_id]
 
     def process_order(self, order: Order) -> None:
-        self.payment_processor.process_payment(order)
+        self.payment_processor.process_payment(
+            price=order.total_price(), reference_id=order.id
+        )
         order.set_status(OrderStatus.PAID)
         print("Shipping order to customer.")

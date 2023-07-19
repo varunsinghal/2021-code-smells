@@ -1,7 +1,5 @@
 from abc import ABC, abstractmethod
 
-from pos.order import Order
-
 
 class PaymentServiceConnectionError(Exception):
     """Custom error that is raised when we couldn't
@@ -14,7 +12,7 @@ class PaymentProcessor(ABC):
         pass
 
     @abstractmethod
-    def process_payment(self, order: Order) -> None:
+    def process_payment(self, price: int, reference_id: int) -> None:
         pass
 
 
@@ -30,11 +28,10 @@ class StripePaymentProcessor(PaymentProcessor):
         )
         self.connected = True
 
-    def process_payment(self, order: Order) -> None:
+    def process_payment(self, price: int, reference_id: int) -> None:
         if not self.connected:
             raise PaymentServiceConnectionError()
-        total_price = order.total_price()
         print(
-            f"Processing payment of ${(total_price / 100):.2f}, "
-            f"reference: {order.id}."
+            f"Processing payment of ${(price / 100):.2f}, "
+            f"reference: {reference_id}."
         )
