@@ -2,7 +2,7 @@ import random
 import string
 
 from pos.order import Order, OrderStatus
-from pos.payment import StripePaymentProcessor
+from pos.payment import PaymentProcessor
 
 
 def generate_id(length: int = 6) -> str:
@@ -11,12 +11,12 @@ def generate_id(length: int = 6) -> str:
 
 
 class POSSystem:
-    def __init__(self):
-        self.payment_processor = StripePaymentProcessor(self)
+    def __init__(self, payment_processor: PaymentProcessor):
+        self.payment_processor = payment_processor
         self.orders: dict[str, Order] = {}
 
-    def setup_payment_processor(self, url: str) -> None:
-        self.payment_processor.connect_to_service(url)
+    def setup_payment_processor(self) -> None:
+        self.payment_processor.connect_to_service()
 
     def register_order(self, order: Order):
         order.id = generate_id()
@@ -25,13 +25,7 @@ class POSSystem:
     def find_order(self, order_id: str) -> Order:
         return self.orders[order_id]
 
-    def compute_order_total_price(self, order: Order) -> int:
-        total = 0
-        for i in range(len(order.prices)):
-            total += order.quantities[i] * order.prices[i]
-        return total
-
     def process_order(self, order: Order) -> None:
-        self.payment_processor.process_payment(order.id)
+        self.payment_processor.process_payment(order)
         order.set_status(OrderStatus.PAID)
         print("Shipping order to customer.")

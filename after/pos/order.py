@@ -1,5 +1,8 @@
 from dataclasses import dataclass, field
 from enum import Enum, auto
+from typing import List
+
+ORDER_ID_LENGTH = 6
 
 
 class OrderStatus(Enum):
@@ -13,23 +16,38 @@ class OrderStatus(Enum):
 
 
 @dataclass
+class Customer:
+    id: int = 0
+    name: str = ""
+    address: str = ""
+    postal_code: str = ""
+    city: str = ""
+    email: str = ""
+
+
+@dataclass
+class OrderItem:
+    item: str
+    quantity: int
+    price: int
+
+
+@dataclass
 class Order:
-    customer_id: int = 0
-    customer_name: str = ""
-    customer_address: str = ""
-    customer_postal_code: str = ""
-    customer_city: str = ""
-    customer_email: str = ""
-    items: list[str] = field(default_factory=list)
-    quantities: list[int] = field(default_factory=list)
-    prices: list[int] = field(default_factory=list)
+    customer: Customer
+    items: List[OrderItem] = field(default_factory=list)
     _status: OrderStatus = OrderStatus.OPEN
     id: str = ""
 
     def create_line_item(self, name: str, quantity: int, price: int) -> None:
-        self.items.append(name)
-        self.quantities.append(quantity)
-        self.prices.append(price)
+        item = OrderItem(name, quantity, price)
+        self.items.append(item)
 
     def set_status(self, status: OrderStatus):
         self._status = status
+
+    def total_price(self) -> int:
+        total = 0
+        for item in self.items:
+            total += item.quantity * item.price
+        return total

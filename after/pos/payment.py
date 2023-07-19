@@ -1,34 +1,40 @@
-from typing import Protocol
+from abc import ABC, abstractmethod
 
 from pos.order import Order
 
 
 class PaymentServiceConnectionError(Exception):
-    """Custom error that is raised when we couldn't connect to the payment service."""
+    """Custom error that is raised when we couldn't
+    connect to the payment service."""
 
 
-class OrderRepository(Protocol):
-    def find_order(self, order_id: str) -> Order:
-        ...
+class PaymentProcessor(ABC):
+    @abstractmethod
+    def connect_to_service(self) -> None:
+        pass
 
-    def compute_order_total_price(self, order: Order) -> int:
-        ...
+    @abstractmethod
+    def process_payment(self, order: Order) -> None:
+        pass
 
 
-class StripePaymentProcessor:
-    def __init__(self, system: OrderRepository):
+class StripePaymentProcessor(PaymentProcessor):
+    def __init__(self, url: str):
         self.connected = False
-        self.system = system
+        self.url = url
 
-    def connect_to_service(self, url: str) -> None:
-        print(f"Connecting to payment processing service at url {url}... done!")
+    def connect_to_service(self) -> None:
+        print(
+            "Connecting to payment processing service at "
+            f"url {self.url}... done!"
+        )
         self.connected = True
 
-    def process_payment(self, order_id: str) -> None:
+    def process_payment(self, order: Order) -> None:
         if not self.connected:
             raise PaymentServiceConnectionError()
-        order = self.system.find_order(order_id)
-        total_price = self.system.compute_order_total_price(order)
+        total_price = order.total_price()
         print(
-            f"Processing payment of ${(total_price / 100):.2f}, reference: {order.id}."
+            f"Processing payment of ${(total_price / 100):.2f}, "
+            f"reference: {order.id}."
         )
